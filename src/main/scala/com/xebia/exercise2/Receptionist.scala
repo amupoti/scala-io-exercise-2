@@ -1,27 +1,27 @@
 package com.xebia
 package exercise2
 
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext
-
-import spray.routing._
-
-import akka.actor.{Props, ActorRef}
 import akka.pattern.ask
 import akka.util.Timeout
-
 import spray.httpx.SprayJsonSupport._
+import spray.routing._
 
-//TODO mixin your ActorContextCreationSupport trait
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
+
+//DONE_TODO mixin your ActorContextCreationSupport trait
 class Receptionist extends HttpServiceActor
-                      with ReverseRoute {
+  with ReverseRoute
+  with ActorContextCreationSupport {
+
   implicit def executionContext = context.dispatcher
 
   def receive = runRoute(reverseRoute)
 }
 
-//TODO mixin the CreationSupport trait so createChild will be available here
-trait ReverseRoute extends HttpService {
+//DONE_TODO mixin the CreationSupport trait so createChild will be available here
+trait ReverseRoute extends HttpService
+  with CreationSupport {
   implicit def executionContext: ExecutionContext
 
   import ReverseActor._
@@ -33,10 +33,12 @@ trait ReverseRoute extends HttpService {
       entity(as[ReverseRequest]) { request =>
         implicit val timeout = Timeout(20 seconds)
 
-        //TODO based on the result (ReverseResult or PalindromeResult)
+        //TODO_DONE based on the result (ReverseResult or PalindromeResult)
         // complete with a ReverseResponse that indicates isPalindrome
-        val futureResponse = reverseActor.ask(Reverse(request.value))
-                                         .mapTo[ReverseResult].map(r=>ReverseResponse(r.value))
+        val futureResponse = reverseActor.ask(Reverse(request.value)) map {
+          case r: ReverseResult => ReverseResponse(r.value)
+          case r: PalindromeResult => ReverseResponse(request.value, isPalindrome = true)
+        }
 
         complete(futureResponse)
       }

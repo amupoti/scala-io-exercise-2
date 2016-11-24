@@ -1,7 +1,7 @@
 package com.xebia
 package exercise2
 
-import akka.actor.{ActorRef, Props}
+import akka.actor.{ActorContext, ActorRef, Props}
 
 trait CreationSupport {
 
@@ -10,4 +10,15 @@ trait CreationSupport {
   def getOrCreateChild(props:Props, name:String):ActorRef = getChild(name).getOrElse(createChild(props, name))
 }
 
-// TODO create an ActorContextCreationSupport trait that extends the CreationSupport and uses an ActorContext to implement the three methods
+// TODO_DONE create an ActorContextCreationSupport trait that extends the CreationSupport and uses an ActorContext to implement the three methods
+
+trait ActorContextCreationSupport extends CreationSupport {
+  val context:ActorContext
+  def getChild(name: String): Option[ActorRef] = {
+    context.child(name)
+  }
+
+  def createChild(props: Props, name: String): ActorRef = {
+    context.actorOf(props,name)
+  }
+}

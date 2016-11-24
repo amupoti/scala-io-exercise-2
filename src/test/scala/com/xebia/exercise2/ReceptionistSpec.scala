@@ -1,24 +1,27 @@
 package com.xebia
 package exercise2
 
-import akka.actor.{Actor, Props, ActorRef, ActorRefFactory}
-
-import spray.testkit.Specs2RouteTest
+import akka.actor.{Actor, ActorRef, ActorRefFactory, Props}
+import org.specs2.mutable.Specification
 import spray.http.StatusCodes
 import spray.httpx.SprayJsonSupport._
-
-import org.specs2.mutable.Specification
+import spray.testkit.Specs2RouteTest
 
 class ReceptionistSpec extends Specification with Specs2RouteTest {
 
   trait TestCreationSupport extends CreationSupport {
-    //TODO implement the TestCreationSupport that creates a FakeReverseActor
+
+    def getChild(name: String): Option[ActorRef] = None
+
+    def createChild(props: Props, name: String): ActorRef = system.actorOf(Props[FakeReverseActor], "fakeReverseActor")
+
   }
 
-  //TODO extend with TestCreationSupport and remove createChild implementation here
-  val subject = new ReverseRoute {
+  //DONE_TODO extend with TestCreationSupport and remove createChild implementation here
+  val subject = new ReverseRoute with TestCreationSupport {
     implicit def actorRefFactory: ActorRefFactory = system
     implicit def executionContext = system.dispatcher
+
   }
 
   "The Receptionist" should {
@@ -42,9 +45,13 @@ class ReceptionistSpec extends Specification with Specs2RouteTest {
   }
 }
 
-//TODO create a FakeReverseActor that only responds to
+//DONE_TODO create a FakeReverseActor that only responds to
 // Reverse("akka") and Reverse("some text to reverse") and sends back the expected result for the test
 class FakeReverseActor extends Actor {
   import ReverseActor._
 
+  def receive: Receive = {
+    case Reverse("akka") => sender ! PalindromeResult()
+    case Reverse("some text to reverse") => sender ! ReverseResult("esrever ot txet emos")
+  }
 }

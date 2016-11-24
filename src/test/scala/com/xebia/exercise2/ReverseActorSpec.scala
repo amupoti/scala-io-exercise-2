@@ -16,7 +16,7 @@ class ReverseActorSpec extends Specification
       // The ImplicitSender is also available so you can expect responses to be sent to the testActor
       // which can be asserted with the TestKit expect... methods.
       //
-      // TODO make this test work
+      //DONE_TODO make this test work
 
       import ReverseActor._
 
@@ -42,7 +42,7 @@ class ReverseActorSpec extends Specification
 
       reverseActor ! Reverse("akka")
 
-      expectMsg(PalindromeResult)
+      expectMsg(PalindromeResult())
 
       expectNoMsg()
 
